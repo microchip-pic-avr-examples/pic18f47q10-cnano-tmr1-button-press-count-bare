@@ -29,87 +29,104 @@
 #include <xc.h>
 #include <stdint.h>
 
-static void CLK_init(void);
-static void PORT_init(void);
-static void TMR1_init(void);
-static void INTERRUPT_init(void);
+static void CLK_Initialize(void);
+static void PORT_Initialize(void);
+static void TMR1_Initialize(void);
+static void INTERRUPT_Initialize(void);
 
 static void TMR1_ISR(void);
 static void TMR1_GATE_ISR(void);
 static void TMR1_writeTimer(uint16_t timerValue);
 
 /* Clock initialization function */
-static void CLK_init(void)
+static void CLK_Initialize(void)
 {
     /* set HFINTOSC as new oscillator source */
-    OSCCON1 = _OSCCON1_NOSC1_MASK | _OSCCON1_NOSC2_MASK;
+    OSCCON1bits.NOSC = 0x6;
 
     /* set Clock Div by 32 */
-    OSCCON1 |= _OSCCON1_NDIV0_MASK | _OSCCON1_NDIV2_MASK;       
+    OSCCON1bits.NDIV = 0x5;      
     
     /* set HFFRQ to 32MHz */
-    OSCFRQ = _OSCFRQ_FRQ1_MASK | _OSCFRQ_FRQ2_MASK;             
+    OSCFRQbits.HFFRQ = 0x6;          
 }
 
 /* Port initialization function */
-static void PORT_init(void)
+static void PORT_Initialize(void)
 {
     /* configure RB5 as input */
-    TRISB |= _TRISB_TRISB5_MASK;
+    TRISBbits.TRISB5 = 1;
     
     /* configure RB5 as digital */
-    ANSELB &= ~(_ANSELB_ANSELB5_MASK);
+    ANSELBbits.ANSELB5 = 0;
 }
 
 /* TMR1 initialization function */
-static void TMR1_init(void)
+static void TMR1_Initialize(void)
 {
-    T1GCON = _T1GCON_GE_MASK        /* Timer controlled by gate function */
-           | _T1GCON_T1GGO_MASK     /* Timer acquistion is ready */
-           | _T1GCON_GSPM_MASK;     /* Timer gate single pulse mode enabled */
-        
-    T1CLK = _T1CLK_T1CS0_MASK;      /* Source Clock FOSC/4 */
+    /* Timer controlled by gate function */
+    T1GCONbits.GE = 1;
+
+    /* Timer acquistion is ready */
+    T1GCONbits.GGO_nDONE = 1;
+    
+    /* Timer gate single pulse mode enabled */
+    T1GCONbits.T1GSPM = 1;  
+
+    /* Source Clock FOSC/4 */
+    T1CLKbits.CS = 0x1;      
     
     /* Clearing IF flag before enabling the interrupt */
-    PIR4 &= ~_PIR4_TMR1IF_MASK;
+    PIR4bits.TMR1IF = 0;
     
     /* Enabling TMR1 interrupt */
-    PIE4 = _PIE4_TMR1IE_MASK;                                              
+    PIE4bits.TMR1IE = 1;                                            
     
     /* Clearing gate IF flag before enabling the interrupt */
-    PIR5 &= ~_PIR5_TMR1GIF_MASK;
-
-    /* Enabling TMR1 gate interrupt */     
-    PIE5 = _PIE5_TMR1GIE_MASK;
+    PIR5bits.TMR1GIF = 0;
     
-    T1CON = _T1CON_CKPS_MASK        /* CLK Prescaler 1:8 */
-          | _T1CON_TMR1ON_MASK;     /* TMR1 enabled */
+    /* Enabling TMR1 gate interrupt */
+    PIE5bits.TMR1GIE = 1;
+    
+    /* CLK Prescaler 1:8 */
+    T1CONbits.CKPS = 0x3;
+
+    /* TMR1 enabled */
+    T1CONbits.ON = 1;     
 }
 
 /* Interrupt initialization function */
-static void INTERRUPT_init(void)
-{
-    INTCON = _INTCON_GIE_MASK      /* Enable the Global Interrupts */
-           | _INTCON_PEIE_MASK;    /* Enable the Peripheral Interrupts */
+static void INTERRUPT_Initialize(void)
+{    
+    /* Enable the Global Interrupts */
+    INTCONbits.GIE = 1;
+
+    /* Enable the Peripheral Interrupts */
+    INTCONbits.PEIE = 1;  
 }
 
 /* Interrupt handler function */
 static void __interrupt() INTERRUPT_interruptManager(void)
 {
-    // Check if interrupts were enabled
-    if(INTCON & _INTCON_PEIE_MASK)
+    // interrupt handler
+    if(INTCONbits.PEIE == 1)
     {
-        /* Check if TMR1 interrupt is enabled and if the interrupt flag is true */
-        if((PIE4 & _PIE4_TMR1IE_MASK) && (PIR4 & _PIR4_TMR1IF_MASK))
+        if(PIE4bits.TMR1IE == 1 && PIR4bits.TMR1IF == 1)
         {
             TMR1_ISR();
         } 
-        
-        /* Check if TMR1 gate interrupt is enabled and if the interrupt flag is true */
-        if((PIE5 & _PIE5_TMR1GIE_MASK) && (PIR5 & _PIR5_TMR1GIF_MASK))  
+        else if(PIE5bits.TMR1GIE == 1 && PIR5bits.TMR1GIF == 1)
         {
             TMR1_GATE_ISR();
         } 
+        else
+        {
+            //Unhandled Interrupt
+        }
+    }      
+    else
+    {
+        //Unhandled Interrupt
     }
 }
 
@@ -117,32 +134,32 @@ static void __interrupt() INTERRUPT_interruptManager(void)
 static void TMR1_ISR(void)
 {  
     /* Stop Gate control */
-    T1GCON &= ~_T1GCON_T1GGO_MASK;                                      
+    T1GCONbits.GGO_nDONE = 0;                                     
     
     /* Clearing overflow IF flag */
-    PIR4 &= ~_PIR4_TMR1IF_MASK;
+    PIR4bits.TMR1IF = 0;
     
     /* Clearing gate IF flag */
-    PIR5 &= ~_PIR5_TMR1GIF_MASK;                                        
+    PIR5bits.TMR1GIF = 0;                                      
     
     /* Reset the counted value */
     TMR1_writeTimer(0);                                                 
     
     /* Prepare for next read */
-    T1GCON |= _T1GCON_T1GGO_MASK;                                       
+    T1GCONbits.GGO_nDONE = 1;                                       
 }
 
 /* TMR1 GATE ISR function */
 static void TMR1_GATE_ISR(void)
 {    
     /* Clearing gate IF flag after button release */
-    PIR5 &= ~(_PIR5_TMR1GIF_MASK);                                     
+    PIR5bits.TMR1GIF = 0;                                   
 
     /* Reset the counted value */
     TMR1_writeTimer(0);                                                 
     
     /* Prepare for next read */
-    T1GCON |= _T1GCON_T1GGO_MASK;                                       
+    T1GCONbits.GGO_nDONE = 1;                                       
 }
 
 /* TMR1 write counter value function */
@@ -157,10 +174,10 @@ static void TMR1_writeTimer(uint16_t timerValue)
 
 void main(void)
 {
-    CLK_init();
-    PORT_init();
-    TMR1_init();
-    INTERRUPT_init();
+    CLK_Initialize();
+    PORT_Initialize();
+    TMR1_Initialize();
+    INTERRUPT_Initialize();
      
     while (1)
     {   
