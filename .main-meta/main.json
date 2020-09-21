@@ -3,27 +3,27 @@
     "category": "com.microchip.ide.project",
     "content": {
         "metaDataVersion": "1.1.0",
-        "name": "com.microchip.mcu8.mplabx.project.",
-        "version": " ",
-        "displayName": "  ",
-        "projectName": "",
-        "shortDescription": "",
+        "name": "com.microchip.mcu8.mplabx.project.pic18f47q10-cnano-tmr1-button-press-count-bare",
+        "version": "1.0.1",
+        "displayName": "Using TMR1 Gate to measure short vs long button press",
+        "projectName": "pic18f47q10-cnano-tmr1-button-press-count-bare",
+        "shortDescription": "This example shows how to use the TMR1 configured in gate single pulse mode. It will start counting on a falling edge when the button is pressed. Two different interrupts will be activated based on how long the button was pressed.",
         "ide": {
-            "name": "",
-            "semverRange": ""
+            "name": "MPLAB X",
+            "semverRange": ">=5.30.0"
         },
         "compiler": [
 			{
-				"name": "",
-				"semverRange": ""
+				"name": "XC8",
+				"semverRange": "^2.10.0"
 			}
 		],
         "dfp": {
-            "name": "",
-            "semverRange": ""
+            "name": "PIC18F-Q_DFP",
+            "semverRange": "^1.3.89"
         },
         "configurator": {
-            "name": "",
+            "name": "N/A",
             "semverRange": ""
         },
         "device": {
@@ -32,26 +32,27 @@
             "content": {
                 "metaDataVersion": "1.0.0",
                 "category": "com.microchip.device",
-                "name": "",
+                "name": "PIC18F47Q10",
                 "versionRange": "*"
             }
         },
-        "author": "",
+        "author": "Microchip",
         "subcategories": [
-            "",
+            "Peripherals",
             [
-               "Peripherals", ""
-            ],
-            [
-               "Peripherals", ""
-            ]            			
+               "Peripherals", "TIMER", "TMR1"
+            ]           			
         ],
         "peripherals": [
-            "",""
+            "TIMER", "TMR1"
         ],
         "keywords": [
-            "",
-            ""			
+            "Getting Started",
+			"Timers/Counters",
+            "Timer/Counter",
+            "Short Press",
+            "Long Press",
+            "Bare Metal"
         ],
 		"additionalData": {
 			"longDescription": {
