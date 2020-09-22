@@ -5,7 +5,7 @@
         "metaDataVersion": "1.1.0",
         "name": "com.microchip.mcu8.mplabx.project.pic18f47q10-cnano-tmr1-button-press-count-bare",
         "version": "1.0.1",
-        "displayName": "Using TMR1 Gate to measure short vs long button press",
+        "displayName": "Using TMR1 Gate to measure a pulse period",
         "projectName": "pic18f47q10-cnano-tmr1-button-press-count-bare",
         "shortDescription": "This example shows how to use the TMR1 configured in gate single pulse mode. It will start counting on a falling edge when the button is pressed. Two different interrupts will be activated based on how long the button was pressed.",
         "ide": {
