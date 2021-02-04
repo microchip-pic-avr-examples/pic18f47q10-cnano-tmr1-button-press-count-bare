@@ -1,5 +1,4 @@
-<div id="readme" class="Box-body readme blob js-code-block-container">
- <article class="markdown-body entry-content p-3 p-md-6" itemprop="This needs to locked down and 'never' changed"><p><a href="https://www.microchip.com" rel="nofollow"><img src="images/MicrochipLogo.png" alt="MCHP" style="max-width:40%;"></a></p>
+[![MCHP](images/microchip.png)](https://www.microchip.com)
 
 # PIC18F47Q10 Using TMR1 Gate to measure short vs long button press
 
